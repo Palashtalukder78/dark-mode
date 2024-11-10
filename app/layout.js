@@ -1,5 +1,8 @@
 import localFont from "next/font/local";
+import Link from "next/link";
+import ThemeSwitch from "./components/ThemeSwitch";
 import "./globals.css";
+import { Providers } from "./providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,11 +22,24 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 dark:bg-gray-900 dark:text-gray-300`}
       >
-        {children}
+        <Providers>
+          <div className="mb-5">
+            <ul className="flex gap-4">
+              <li>
+                <Link href="/">Home</Link>
+              </li>
+              <li>
+                <Link href="/dark">Dark-Mode</Link>
+              </li>
+              <ThemeSwitch />
+            </ul>
+          </div>
+          {children}
+        </Providers>
       </body>
     </html>
   );

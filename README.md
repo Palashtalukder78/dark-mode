@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+STEP 1: Edit TailwindCSS config file
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```javascript
+// tailwind.config.ts
+/\*_ @type {import('tailwindcss').Config} _/;
+module.exports = {
+  darkMode: "class",
+  // ...
+};
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+STEP 2: next-themes
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Command: npm i next-themes
+First, create a providers.tsx file inside your app folder like this:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```javascript
+// app/providers.jsx
+"use client";
 
-## Learn More
+import { ThemeProvider } from "next-themes";
 
-To learn more about Next.js, take a look at the following resources:
+export function Providers({ children }) {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      {children}
+    </ThemeProvider>
+  );
+}
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+STEP 3: add the <Providers> component to your root layout.tsx by placing it inside the <body> tag Like:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```javascript
+// app/layout.tsx
+import { Providers } from "./providers";
 
-## Deploy on Vercel
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode,
+}) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Note: suppressHydrationWarning in <html> tag. AND DARK CLASSES WILL BE IN THS CODE..
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+step 5: useTheme
+Your implementation of next-themes is not complete until you create a component allowing users to manually change the themes. I called my component ThemeSwitch.Jsx.
+
+```javascript
+// app/components/ThemeSwitch.tsx
+"use client";
+
+import { FiSun, FiMoon } from "react-icons/fi";
+import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
+import Image from "next/image";
+
+export default function ThemeSwitch() {
+  const [mounted, setMounted] = useState(false);
+  const { setTheme, resolvedTheme } = useTheme();
+
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted)
+    return (
+      <Image
+        src="data:image/svg+xml;base64,PHN2ZyBzdHJva2U9IiNGRkZGRkYiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMCIgdmlld0JveD0iMCAwIDI0IDI0IiBoZWlnaHQ9IjIwMHB4IiB3aWR0aD0iMjAwcHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiB4PSIyIiB5PSIyIiBmaWxsPSJub25lIiBzdHJva2Utd2lkdGg9IjIiIHJ4PSIyIj48L3JlY3Q+PC9zdmc+Cg=="
+        width={36}
+        height={36}
+        sizes="36x36"
+        alt="Loading Light/Dark Toggle"
+        priority={false}
+        title="Loading Light/Dark Toggle"
+      />
+    );
+
+  if (resolvedTheme === "dark") {
+    return <FiSun onClick={() => setTheme("light")} />;
+  }
+
+  if (resolvedTheme === "light") {
+    return <FiMoon onClick={() => setTheme("dark")} />;
+  }
+}
+```
